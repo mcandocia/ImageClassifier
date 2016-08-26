@@ -61,7 +61,7 @@ class NetConvPoolLayer(object):
 		fan_in = np.prod(filter_shape[1:])
 		#this is the number of output weights per channel divided by the
 		#pooling size
-		fan_out = (filter_shape[0] * np.prod(filter_shape[2:]))//
+		fan_out = (filter_shape[0] * np.prod(filter_shape[2:]))/\
 		    np.prod(poolsize)
 		W_bound = np.sqrt(6./(fan_in + fan_out))
 		#initializes weights with appropriate values and shape
@@ -114,17 +114,31 @@ class NetConvPoolLayer(object):
 			else:
 				#set old values to initialized theano value
 				self.sd_input_old = theano.shared(
-					np.float32(np.ones((1,image_shape[1],1,1))),broadcastable=(True,False,True,True))
+					np.float32(
+						np.ones(
+							(1,image_shape[1],1,1)
+							)
+						),
+					broadcastable=(True,False,True,True)
+					)
 				self.means_old = theano.shared(
-					np.float32(np.zeros((1,image_shape[1],1,1))),broadcastable=(True,False,True,True))
+					np.float32(
+						np.zeros(
+							(1,image_shape[1],1,1)
+							)
+						),
+					broadcastable=(True,False,True,True)
+					)
 				sbsp = self.batchnorm_slide_percent
-				self.sd_input = sbsp * self.sd_input_old + 
-				    (1.-sbsp)*T.sqrt(T.var(input,(0,2,3))+0.00001).dimshuffle('x',0,'x','x')
-				self.means = sbsp * self.means_old + 
-				    (1-sbsp) * T.mean(input,(0,2,3)).dimshuffle('x',0,'x','x')
+				self.sd_input = sbsp * self.sd_input_old + \
+				    (1.-sbsp)*T.sqrt(T.var(input,(0,2,3))+0.00001).\
+				    dimshuffle('x',0,'x','x')
+				self.means = sbsp * self.means_old + \
+				    (1-sbsp) * T.mean(input,(0,2,3)).\
+				    dimshuffle('x',0,'x','x')
 			self.input_normalized = (input - self.means)/self.sd_input
-			self.input = self.input_normalized * (np.float32(1.) + 
-				     self.GAMMA.dimshuffle('x',0,'x','x')) + 
+			self.input = self.input_normalized * (np.float32(1.) + \
+				     self.GAMMA.dimshuffle('x',0,'x','x')) + \
 			             self.BETA.dimshuffle('x',0,'x','x')
 		if amp_value == None:
 			conv_out = conv2d(

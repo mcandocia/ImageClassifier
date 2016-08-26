@@ -11,7 +11,6 @@ import timeit
 import time
 
 import numpy as np
-import numpy #I make too many typos
 
 import prepare_image_data
 
@@ -91,7 +90,7 @@ class neural_network(object):
         self.batchnorm_vals_filename = batchnorm_vals_filename
         self.batchnorm_slide_percent = batchnorm_slide_percent
         if not self.uses_batch_normalization:
-            self.batch_normalization_pattern = [False for _ in relu_pattern]
+            self.batch_norm_pattern = [False for _ in relu_pattern]
         self.address=address
         #replace future instances of self.kernel
         self.kernels = kernel_sizes
@@ -358,7 +357,7 @@ class neural_network(object):
         self.patience_increase = 3
         self.improvement_threshold = 0.995
         self.validation_frequency = min(self.n_train_batches,self.patience//2)
-        self.best_validation_loss = numpy.inf
+        self.best_validation_loss = np.inf
         self.best_iter = 0
         #DEPRECATED 
         self.itermode = 'train'
@@ -529,8 +528,8 @@ def load_network_isolate(filename,modified_batch_size=None):
     with open(filename,'r') as f:
         paramdict = pickle.load(f)
     try:
-        paramdict['batch_normalization_pattern'] = 
-        paramdict.pop('batch_norm_pattern')
+        paramdict['batch_normalization_pattern'] = \
+            paramdict.pop('batch_norm_pattern')
     except KeyError:
         print 'no batch_norm_pattern to pop'
     
@@ -553,10 +552,11 @@ def load_network_isolate(filename,modified_batch_size=None):
     for values, layer in zip(paramdict['LAYER_VALUES'],network.layers):
         layer.b.set_value(values[1])
         layer.W.set_value(values[0])
-    for values, layer in zip(paramdict['BATCH_LAYER_VALUES'],network.layers):
-        if values <> None:
-            layer.GAMMA.set_value(values[0])
-            layer.BETA.set_value(values[1])
+    if 'BATCH_LAYER_VALUES' in paramdict:
+        for values, layer in zip(paramdict['BATCH_LAYER_VALUES'],network.layers):
+            if values <> None:
+                layer.GAMMA.set_value(values[0])
+                layer.BETA.set_value(values[1])
     for param, value in paramdict.iteritems():
         if param not in secondary_params + batch_normalization_secondary_params:
             #print '%s not in secondary_params' % param
