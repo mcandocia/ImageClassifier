@@ -28,7 +28,7 @@ BATCH_NORMALIZATION_EPSILON = 0.00001
 
 #parameters that are default are used to reconstruct the object when reloaded
 #secondary parameters are values that can change throughout the course of training
-default_params = ['batch_size','kernel_sizes','input_dimensions',
+default_params = ['batch_size','kernels','input_dimensions',
                   'convolution_dimensions','pool_sizes','stride_sizes',
                   'layer_pattern','relu_pattern','dropout_rate','rng_seed',
                   'base_learning_rate','learning_decay_per_epoch','l2_norm','name'
@@ -54,7 +54,7 @@ default_params += batch_normalization_params
 secondary_params += batch_normalization_secondary_params
 
 class neural_network(object):
-    def __init__(self, batch_size, kernel_sizes, input_dimensions, 
+    def __init__(self, batch_size, kernels, input_dimensions, 
                  convolution_dimensions, pool_sizes, stride_sizes, layer_pattern, 
                  relu_pattern,  dropout_rate,rng_seed=None, 
                  base_learning_rate = 0.05, momentum = 0.8,
@@ -65,7 +65,7 @@ class neural_network(object):
                  batchnorm_slide_percent = 0.):
         """
         batch_size - int - size of each batch
-        kernel_sizes - int array - number of general units each layer (incl. input/output)
+        kernels - int array - number of general units each layer (incl. input/output)
         input_dimensions - int array[2] -  dimensions of input
         convolution_dimensions - int array[2] array - dimensions of each convolution
         pool_sizes - int array[2] array - dimensions of pooling for each convolution
@@ -93,10 +93,7 @@ class neural_network(object):
             self.batch_norm_pattern = [False for _ in relu_pattern]
         self.address=address
         #replace future instances of self.kernel
-        self.kernels = kernel_sizes
-        #shorthand for initialization
-        kernels = kernel_sizes
-        #self.kernel_sizes = kernel_sizes
+        self.kernels = kernels
         self.input_dimensions = input_dimensions
         self.output_size = kernels[-1:][0]
         self.inputs = []
@@ -169,7 +166,7 @@ class neural_network(object):
         self.testing_x = theano.shared(
             np.zeros(
                 shape=(
-                    self.batch_size,kernel_sizes[0],
+                    self.batch_size,kernels[0],
                     input_dimensions[0],
                     input_dimensions[1]
                     ),
@@ -184,7 +181,7 @@ class neural_network(object):
             np.zeros(
                 shape = (
                     self.batch_size,
-                    kernel_sizes[0],
+                    kernel[0],
                     input_dimensions[0],
                     input_dimensions[1]
                     ),
@@ -543,6 +540,7 @@ def load_network_isolate(filename,modified_batch_size=None):
             batch_normalization_secondary_params
             )
                  }
+    print newkwargs
     network = neural_network(**newkwargs)
     '''
     estring = "network = neural_network(" + ','.join([" %s = %s" % (key,repr(entry)) for key, entry in paramdict.iteritems() if key not in [ "LAYER_VALUES","BATCH_LAYER_VALUES",'batch_norm_learning_rate' ]  and key not in default_blacklist and key not in secondary_params + batch_normalization_secondary_params]) + ')'
