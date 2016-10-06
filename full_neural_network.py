@@ -181,7 +181,7 @@ class neural_network(object):
             np.zeros(
                 shape = (
                     self.batch_size,
-                    kernel[0],
+                    kernels[0],
                     input_dimensions[0],
                     input_dimensions[1]
                     ),
