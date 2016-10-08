@@ -130,9 +130,9 @@ class neural_network(object):
         self.ratios = np.asarray([0.6,0.2,0.2])
         self.index = index = T.lscalar()
         #temporarily hardcoded
-	self.n_train_batches = 600
-	self.n_valid_batches = 250
-	self.n_test_batches = 250
+	self.n_train_batches = 400
+	self.n_valid_batches = 120
+	self.n_test_batches = 120
 	self.cat_labels = self.fetcher.valid_names
         self.y_dim = len(self.cat_labels)
         self.momentum = theano.shared(np.float32(momentum))
@@ -474,6 +474,8 @@ class neural_network(object):
         for param in default_params + extraparams:
             evalstring = 'paramdict["%s"] = self.%s' % (param , param)
             if not hasattr(self,param):
+                if param=='kernels':
+                    print '!!!! NO KERNELS'
                 continue
             #print evalstring
             exec(evalstring)
